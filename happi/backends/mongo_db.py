@@ -41,6 +41,7 @@ class MongoBackend(_Backend):
     """
     _timeout = 5
     _conn_str = 'mongodb://{user}:{pw}@{host}/{db}'  # String for login
+    _conn_str_short = 'mongodb://{host}/{db}' # short string without username and password
 
     def __init__(self, host=None, user=None,
                  pw=None, db=None, collection=None,
@@ -48,8 +49,11 @@ class MongoBackend(_Backend):
         # Default timeout
         timeout = timeout or self._timeout
         # Format connection string
-        conn_str = self._conn_str.format(user=user, pw=pw,
+        if user and pw:
+            conn_str = self._conn_str.format(user=user, pw=pw,
                                          host=host, db=db)
+        else:
+            conn_str = self._conn_str_short.format(host=host, db=db)
         logging.debug('Attempting connection using %s ', conn_str)
         self._client = MongoClient(conn_str, serverSelectionTimeoutMS=timeout)
         self._db = self._client[db]
